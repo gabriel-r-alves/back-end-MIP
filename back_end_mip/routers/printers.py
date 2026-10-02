@@ -21,7 +21,7 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(
     prefix="/printers",
-    tags=["printers"],
+    tags=["Printers"],
     #dependencies=[Depends(get_token_header)], Adicionar futuramente quando estiver implementado funcional
     responses={404: {"description": "Not found"}},
 )
