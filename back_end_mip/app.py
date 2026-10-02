@@ -3,11 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import printers
 from .routers import branches
+from .routers import branch_networks
 
 
 app = FastAPI()
 app.include_router(printers.router)
 app.include_router(branches.router)
+app.include_router(branch_networks.router)
 
 # temporariamente futuramente migrar para um midleware separado, atualmente para testes e uso interno
 app.add_middleware(

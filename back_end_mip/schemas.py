@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from pydantic import BaseModel
 
 
@@ -26,3 +26,22 @@ class BranchPublic(BaseModel):
 
 class ListBranchPublic(BaseModel):
     branches: list[BranchPublic]
+    
+
+class BranchNetworkPublic(BaseModel):
+    id: int
+    ip_version: str
+    start_readable: str
+    end_readable: str
+    description: str
+
+
+class BranchNetworksPublic(BaseModel):
+    branch_id: int
+    networks: list[BranchNetworkPublic]
+
+
+class ListBranchesNetworksPublic(BaseModel):
+    networks_by_branch_id: list[BranchNetworksPublic]
+    
+    
