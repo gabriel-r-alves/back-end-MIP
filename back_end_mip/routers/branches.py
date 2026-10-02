@@ -1,5 +1,5 @@
 #from ..dependencies import get_token_header
-from ..models import Branch
+from ..models import Branch, BranchNetwork
 from ..database import get_session
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,14 +12,15 @@ from sqlalchemy.orm import Session
 
 from ..schemas import(
     BranchPublic,
-    ListBranchPublic
+    ListBranchPublic,
+    BranchNetworksPublic
 )
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(
     prefix="/branches",
-    tags=["branches"],
+    tags=["Branches"],
     #dependencies=[Depends(get_token_header)], Adicionar futuramente quando estiver implementado funcional
     responses={404: {"description": "Not found"}},
 )
@@ -51,4 +52,24 @@ def read_branch(branch_id:str, session: SessionDep):
     if branch is None:
         raise HTTPException(status_code=404, detail="Branch not found")
     return branch
+
+
+@router.get(
+    "/{branch_id}/networks",
+    status_code=HTTPStatus.OK,
+    response_model=BranchNetworksPublic
+)
+def read_branch_networks(branch_id:str, session: SessionDep):
+    networks = BranchNetwork.get_by_branch_id(branch_id, session)
+
+    if len(networks) == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Networks by branch id not found"
+        )
+
+    return {
+        "branch_id": branch_id,
+        "networks": networks
+    }
 
