@@ -44,4 +44,15 @@ class BranchNetworksPublic(BaseModel):
 class ListBranchesNetworksPublic(BaseModel):
     networks_by_branch_id: list[BranchNetworksPublic]
     
+
+class ScanTargetPublic(BaseModel):
+    ip: str
+    branch_id: int
+    network_id: int | None
+    collector_type: str
+    
+
+class ListScanTargetPublic(BaseModel):
+    targets: list[ScanTargetPublic]
+    
     

@@ -11,7 +11,7 @@ class Printer(Base):
 
     
     def __repr__(self) -> str:
-        return f"Printer(num_serial='{self.num_serial}', model='{self.model}', status='{self.status}', ip='{self.ip}', counter='{self.counter}', function='{self.printer_function}', last_modify='{self.last_modify}')"
+        return f"Printer(num_serial='{self.num_serial}', model='{self.model}', status='{self.status}', ip='{self.ip}', counter='{self.counter}', collector='{self.collector_type}'function='{self.printer_function}', last_modify='{self.last_modify}')"
     
     
     @classmethod
@@ -27,6 +27,16 @@ class Printer(Base):
             ,cls.num_serial == printer_serial
         )
         return session.execute(stmt).scalar_one_or_none()
+    
+    
+    @classmethod
+    def get_all_scannable(cls, session):
+        stmt = select(cls).where(
+            cls.active.is_(True)
+            ,cls.ip.is_not(None)
+            ,cls.collect
+        )
+        return session.scalars(stmt).all()
     
 
 class Branch(Base):
@@ -50,11 +60,6 @@ class Branch(Base):
             cls.id == branch_id
         )
         return session.execute(stmt).scalar_one_or_none()
-    
-    
-    @classmethod
-    def get
-    
     
     
 class BranchNetwork(Base):

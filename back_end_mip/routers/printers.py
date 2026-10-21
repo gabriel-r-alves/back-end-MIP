@@ -11,7 +11,6 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 
 from ..schemas import(
-    Message,
     PrinterPublic,
     ListPrinterPublic
 )
@@ -50,3 +49,13 @@ def read_printer(printer_serial: str, session:SessionDep):
     if printer is None:
         raise HTTPException(status_code=404, detail="Printer not found")
     return printer
+
+
+@router.post(
+    "/",
+    status_code=HTTPStatus.CREATED
+)
+def add_printer(printer, session: SessionDep):
+    pass
+    
+    
