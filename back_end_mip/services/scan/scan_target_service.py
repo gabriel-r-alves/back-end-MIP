@@ -41,8 +41,3 @@ class ScanTargetService:
         
         # filtrered_scan_data = self._filter_scan_data(scan_data_list)
         return scan_data_list
-
-    
-    def _filter_scan_data(self, scan_data_list: list[ScanData]) -> list[ScanData]:
-        return scan_data_list
-    

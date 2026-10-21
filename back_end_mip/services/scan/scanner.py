@@ -5,8 +5,8 @@ from back_end_mip.database.models import Printer, BranchNetwork
 
 from back_end_mip.loggin import log_error, log_info
 
-from . import ScanValidator, PostScan
-from . import  PrinterScanTargetResp, NetworkScanTargetResp
+from . import ScanValidator
+from . import PrinterScanTargetResp, NetworkScanTargetResp
 
 from back_end_mip.domain.dtos import ScanData, PrinterData, ScanTarget
 from domain.enums import CollectorType, ConnectionStatus, ScanStatus
@@ -20,24 +20,23 @@ class Scanner:
             self.error_repository = error_repository
     
             self.validator = ScanValidator()
-            self.post_scan = PostScan()
     
             self.MAX_IPS_PER_NETWORK = 4096
     
     
     def targets_scan_printers(self) -> PrinterScanTargetResp:
-        prep_scan_targerts = PrinterScanTargetResp(scan_targets=[], invalid_printers=[])
+        prep_scan_targets = PrinterScanTargetResp(scan_targets=[], invalid_printers=[])
         
         log_info("Verificando repositório de impressoras...")
         if self.printer_repository is None:
             log_error("[X] ERRO CRITICO. REPOSITORY NÃO CARREGADO.")
-            return prep_scan_targerts
+            return prep_scan_targets
         log_info("SUCESSO!")
 
         log_info("Verificando repositório de erros...")
         if self.error_repository is None:
             log_error("[X] ERRO CRITICO. REPOSITORY NÃO CARREGADO.")
-            return prep_scan_targerts
+            return prep_scan_targets
         log_info("SUCESSO!")
 
         printers_db = self.printer_repository.get_all_printers()
@@ -45,7 +44,7 @@ class Scanner:
         log_info("Obtendo impressoras do Banco de Dados...")
         if not printers_db:
             log_error("[X] Sem impressoras cadastrada no Banco de Dados.")
-            return prep_scan_targerts
+            return prep_scan_targets
         
         for printer in printers_db:
             log_info("Iniciando validação da impressora...")
@@ -60,10 +59,10 @@ class Scanner:
                     connection=ConnectionStatus.INITIALIZED,
                     status=ScanStatus.INVALID_PRINTER,
                     collector_type=None,
-                    printer_data=self._printer_to_data(printer)
+                    printer_data=self.__printer_to_data(printer)
                 )
                 
-                prep_scan_targerts.invalid_printers.append(scan_resp)
+                prep_scan_targets.invalid_printers.append(scan_resp)
     
             log_info("Impressora válida!")
             # Não sobrescrever o objeto original — converte localmente
@@ -75,13 +74,12 @@ class Scanner:
                 collector_type=collector_type
             )
             
-            prep_scan_targerts.scan_targets.append(target)
-            
+            prep_scan_targets.scan_targets.append(target)
         
-        log_info(f"Impressoras válida para scan sendo enviadas: {len(prep_scan_targerts.scan_targets)}")
-        log_info(f"Impressoras inválida para scan ignoradas: {len(prep_scan_targerts.invalid_printers)}")
+        log_info(f"Impressoras válida para scan sendo enviadas: {len(prep_scan_targets.scan_targets)}")
+        log_info(f"Impressoras inválida para scan ignoradas: {len(prep_scan_targets.invalid_printers)}")
 
-        return prep_scan_targerts
+        return prep_scan_targets
 
 
     def targets_scan_networks(self) -> NetworkScanTargetResp:
@@ -106,8 +104,6 @@ class Scanner:
             log_error("[X] Lista vazia! Nenhuma filial cadastrada.")
             return prep_scan_targets
 
-        targets_scan_branches = []
-
         for branch in branches_db:
             log_info(f"Obtendo redes da filial {branch.id} {branch.name}")
 
@@ -123,8 +119,16 @@ class Scanner:
                 ips_to_scan = self.__scan_network(network)
                 
                 for ip in ips_to_scan:
+                    target = ScanTarget(
+                        ip=ip,
+                        branch_id=branch.id,
+                        network_id=network.id,
+                        collector_type=network.collector_type
+                    )
                     
-        return targets_scan_branches
+                    prep_scan_targets.scan_targets.append(target)
+        
+        return prep_scan_targets
 
 
     def __scan_network(self, network: BranchNetwork) -> list[str]:
@@ -184,31 +188,11 @@ class Scanner:
         return ips_to_scan
 
 
-    async def _network_ping_and_scan(self, network: BranchNetwork, ip: str) -> ScanData:
-        """Pipeline por rede de filial — prepara metadata e chama pipeline genérico."""
-        return await self._ping_and_scan(
-            ip=ip,
-            branch_id=network.branch_id,
-            network_id=network.id,
-            collector_type=network.collector_type
-        )
-
-
-    # mover para validator antes de sync
-    def _generate_scan_error(self, printer, error):
-        error = ErrorCounter(
-            num_serial=printer.num_serial,
-            branch_id=printer.branch_current_id,
-            ip=printer.ip,
-            status=printer.status,
-            named_error=error
-        )
-        return error
-
-
-    def _printer_to_data(self, printer:Printer):
+    def __printer_to_data(self, printer:Printer):
         return PrinterData(
             num_serial=printer.num_serial,
             model=printer.model,
             counter=str(printer.counter)
         )
+        
+        

@@ -52,3 +52,5 @@ class ScanErrorType(StrEnum):
     INTERNAL_ERROR = "internal_error"
     TIMEOUT = "timeout"    
     
+
+class 
