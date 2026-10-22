@@ -1,5 +1,8 @@
-from ..models import Printer
-from ..database import get_session
+from back_end_mip.repositories import PrinterRepository
+
+from back_end_mip.services.scan import ScanTargetService
+
+from back_end_mip.database.session import get_session
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -33,7 +36,8 @@ router = APIRouter(
 def read_targets(
     session:SessionDep
 ):
-    printers = Printer.get_all_scannable(session)
+    scan_target_service = ScanTargetService(PrinterRepository(session))
+    printers = scan_target_service.collect_scan_data('db')
     
     if len(printers) == 0:
         raise HTTPException(status_code=404, detail="Table is empty")

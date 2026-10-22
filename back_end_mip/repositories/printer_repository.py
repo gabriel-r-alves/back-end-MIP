@@ -1,4 +1,5 @@
 from back_end_mip.database.models import Printer
+from back_end_mip.domain.enums import CollectorType
 
 from sqlalchemy import select
 
@@ -22,6 +23,17 @@ class PrinterRepository:
         stmt = select(Printer).where(Printer.ip==ip)        
         return self.session.execute(stmt).scalar_one_or_none()
     
+    
+    def get_all_scannable(self):
+        stmt = select(Printer).where(
+            Printer.active.is_(True)
+            ,Printer.ip.is_not(None)
+            ,Printer.collector_type.in_(
+                [collector.value for collector in CollectorType]
+            )
+        )
+        return self.session.execute(stmt).scalars().all()
+        
 
     def delete_by_serial(self, num_serial):
         stmt = select(Printer).where(Printer.num_serial == num_serial)

@@ -9,11 +9,6 @@ from .scanner import Scanner
 class PrinterScanTargetResp:
     scan_targets: list[ScanTarget]
     invalid_printers: list[ScanData]
-    
-    
-@dataclass
-class NetworkScanTargetResp:
-    scan_targets: list[ScanTarget]
 
 
 class ScanTargetService:
@@ -31,10 +26,11 @@ class ScanTargetService:
         )
     
     
-    def collect_scan_data(self, type_scan:str):
+    def collect_scan_data(self, type_scan:str) -> list[ScanTarget]:
         scan_data_list = []
         if type_scan == "db": # temporario
-            scan_data_list = self.scanner.targets_scan_printers()
+            printer_scan_targets = self.scanner.targets_scan_printers()
+            scan_data_list = printer_scan_targets.scan_targets
         
         elif type_scan == "branch": # temporario
             scan_data_list = self.scanner.targets_scan_networks()

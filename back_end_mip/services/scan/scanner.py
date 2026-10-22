@@ -63,6 +63,7 @@ class Scanner:
                 )
                 
                 prep_scan_targets.invalid_printers.append(scan_resp)
+                continue
     
             log_info("Impressora válida!")
             # Não sobrescrever o objeto original — converte localmente
@@ -82,7 +83,7 @@ class Scanner:
         return prep_scan_targets
 
 
-    def targets_scan_networks(self) -> NetworkScanTargetResp:
+    def targets_scan_networks(self) -> list[ScanTarget]:
         prep_scan_targets = NetworkScanTargetResp(scan_targets=[])
         
         log_info("Verificando repositório de Filiais...")

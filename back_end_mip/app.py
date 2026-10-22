@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import printers
-from .routers import branches
-from .routers import branch_networks
-from .routers import targets
+from .routers import(
+    printers,
+    branches,
+    branch_networks,
+    targets
+    )
 
 
 app = FastAPI()
